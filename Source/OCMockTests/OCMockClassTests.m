@@ -29,6 +29,11 @@
     return @"Foo";
 }
 
++ (NSString *)echo:(NSString *)argument
+{
+    return argument;
+}
+
 @end
 
 
@@ -93,6 +98,18 @@
 	[[[mockClass stub] andReturn:@"TestFoo"] method1];
     [mockClass stopMocking];
 	STAssertEqualObjects(@"Foo", [TestClassWithClassMethod method1], @"Should not have stubbed method.");
+}
+
+- (void)testRestoreCorrectIMPWhenMethodSwizzledSeveralTimes
+{
+    mockClass = [OCMockObject mockForClassObject:[TestClassWithClassMethod class]];
+    
+    // This will cause the echo: method to be swizzled twice: once for each set of arguments
+	[[mockClass expect] echo:@"test"];
+    [[mockClass reject] echo:OCMOCK_ANY];
+    
+    [mockClass stopMocking];
+    STAssertEqualObjects(@"foo", [TestClassWithClassMethod echo:@"foo"], @"Should not have stubbed method.");
 }
 
 - (void)testStopMockingUnmocksClass

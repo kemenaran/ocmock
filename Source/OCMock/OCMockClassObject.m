@@ -114,7 +114,9 @@ static NSMutableDictionary *mockTable;
 	IMP originalImp = class_replaceMethod(metaClass, method_getName(originalMethod), forwarderImp, method_getTypeEncoding(originalMethod));
     
     NSString *name = NSStringFromSelector(selector);
-    [mockedImpTable setValue:[NSValue valueWithNonretainedObject:(id)originalImp] forKey:name];
+    
+    if (![mockedImpTable objectForKey:name]) // the same method can be swizzled more than once, but we still want to keep the original implementation
+        [mockedImpTable setValue:[NSValue valueWithNonretainedObject:(id)originalImp] forKey:name];
 }
 
 - (void)forwardInvocationForRealObject:(NSInvocation *)anInvocation
